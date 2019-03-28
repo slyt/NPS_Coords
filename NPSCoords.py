@@ -30,18 +30,19 @@ if __name__ == '__main__':
 
     shortestRoute = Route()
     # Load CSV of National Park Coordinates
-    with open('C:\Users\Josh\Desktop\Python\National Parks Info - National Parks GPS Coords.csv') as csvfile:
+    with open('NationalParkGPSCoords.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         for row in readCSV:
             parks.append((row[0],row[1], row[2]))
             #print(row[0],row[1],row[2],)
 
 
-    #print parks[1][0] # Place Name
-    #print parks[1][1] # Latitude
-    #print parks[1][2] # Longitude
+    print parks[1][0] # Place Name
+    print parks[1][1] # Latitude
+    print parks[1][2] # Longitude
 
-    # add the first place as the head of the Linked List
+    # TODO: Add user input to select starting point
+    # Add the first place as the head of the Linked List
     shortestRoute.headval = Place(name = parks[1][0], lat=parks[1][1], long=parks[1][2])
     shortestRoute.tailval = shortestRoute.headval
     shortestRoute.length = 1
