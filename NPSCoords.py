@@ -10,7 +10,7 @@ class Place: # A type of Linked List Node that also has coordinate and distance 
         self.long = long
 
         self.nextPlace = None
-        self.nearestDistance = sys.maxint
+        self.nearestDistance = sys.maxsize
 
     def distance_to(self, destination):
         # Find distance between Route Tail and currPark
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     shortestRoute = Route()
     # Load CSV of National Park Coordinates
-    with open('NationalParkGPSCoords.csv') as csvfile:
+    with open('NationalParkGPSCoords.csv', encoding="utf8") as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         next(readCSV) # skip CSV header: Place Name, Latitude, Longitude
         for row in readCSV:
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     while shortestRoute.length < parks.__len__():
         # Initialize loop
         nearestPark = None
-        nearestParkDistance = sys.maxint
+        nearestParkDistance = sys.maxsize
 
         # Iterate through all parks and find the nearest park to the current tail of the Route
         for currPark in parks:
