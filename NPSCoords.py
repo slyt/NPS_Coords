@@ -31,6 +31,17 @@ class Route: # A Linked List comprised of places
             print (printval.name, printval.lat, printval.long, printval.nearestDistance)
             printval = printval.nextPlace
 
+    def listprint_csv(self):
+        print('Name,', 'Latitude,', 'Longitude,', 'Distance to Next Place (km)')
+        printval = self.headval
+
+        while printval is not None:
+            print (printval.name.replace(',', ''), ',',
+                   printval.lat, ',',
+                   printval.long, ',',
+                   str(printval.nearestDistance).replace('km',''))
+            printval = printval.nextPlace
+
     def add_place(self, place):
 
         if self.headval is None: # if empty route, add starting place
@@ -60,15 +71,12 @@ if __name__ == '__main__':
 
     # TODO: Add user input to select starting point
     # Add the first place as the head of the Linked List
-    startingPlace = random.choice(parks) # Choose a random starting place
-    #parks[0] = None # Remove starting place from the list
+    startingPlace = parks[0] # Start at the first park in the CSV
+    # startingPlace = random.choice(parks) # Choose a random starting place
     shortestRoute.add_place(startingPlace)
 
-    nearestParkIndex = 0
-    parks[nearestParkIndex] = None
-
     # Compute until we have processed all of the parks.
-    while shortestRoute.length < parks.__len__():
+    while shortestRoute.length <= parks.__len__():
         # Initialize loop
         nearestPark = None
         nearestParkDistance = sys.maxsize
@@ -76,7 +84,7 @@ if __name__ == '__main__':
         # Iterate through all parks and find the nearest park to the current tail of the Route
         for currPark in parks:
 
-            if shortestRoute.length is parks.__len__():  # We are done if all of the parks have been used
+            if shortestRoute.length is parks.__len__()+1:  # We are done if all of the parks have been used
                 break
 
             if currPark is None:  # This park has already been added to the Route and should be skipped
@@ -100,9 +108,9 @@ if __name__ == '__main__':
         shortestRoute.tailval.nearestDistance = currDist
         shortestRoute.tailval = nearestPark  # Make the nearest place the last place
 
-
     # Print Result
-    shortestRoute.listprint()
+    #shortestRoute.listprint()
+    shortestRoute.listprint_csv()
 
 
 
