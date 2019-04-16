@@ -1,7 +1,9 @@
 import csv;
 import sys;
 import random;
+import pandas as pd;
 from geopy.distance import geodesic;
+
 
 class Place: # A type of Linked List Node that also has coordinate and distance information
     def __init__(self, name=None, lat=None, long=None):
@@ -54,6 +56,9 @@ class Route: # A Linked List comprised of places
         self.length = self.length + 1
 
 if __name__ == '__main__':
+
+    pandaparks = pd.read_csv('NationalParkGPSCoords.csv')# pandas dataframe of national parks and their coordinates
+    print(pandaparks)
 
     parks = [] # List of Places
 
