@@ -113,4 +113,13 @@ if __name__ == '__main__':
     shortestRoute.listprint_csv()
 
 
-
+## TODO: Plot points on map
+m = Basemap(projection = 'mill',
+        llcrnrlat = -90,
+        llcrnrlon = -180,
+        urcrnrlat = 90,
+        urcrnrlon = 180,
+        resolution = '1')
+m.drawcoastlines()
+plt.title('National Park Map')
+plt.show()
