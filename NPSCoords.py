@@ -2,6 +2,7 @@ import csv
 import sys
 import random
 import pandas as pd
+import numpy as np
 import geopandas
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
@@ -40,6 +41,7 @@ class Route: # A Linked List comprised of places
             count = count + 1
 
     def listprint_csv(self):
+        # Index is the original index in the initial dataframe
         print('Index,', 'Name,', 'Latitude,', 'Longitude,', 'Distance to Next Place (km)')
         printval = self.headval
 
@@ -73,27 +75,39 @@ class Route: # A Linked List comprised of places
         self.length = self.length + 1
 
 
-
 def create_distance_matrix(df):
-  # df is a pandas DataFrame that must contain Longitude and Latitude columns
-  length = df.shape[0]
+    # df is a pandas DataFrame that must contain Longitude and Latitude columns
+    length = df.shape[0]
 
-  # intialize square matrix of shape length x length
-  matrix = [[0 for i in range(length)] for j in range(length)]
-  for i in range(length):
-    for j in range(length):
-      distance =  round(geodesic( (df.loc[i, "Latitude"], df.loc[i, "Longitude"]), (df.loc[j, "Latitude"], df.loc[j, "Longitude"])).km)
-      matrix[i][j] = distance
-
-  return matrix
+    # intialize square matrix of shape length x length
+    matrix = [[0 for i in range(length)] for j in range(length)]
+    for i in range(length):
+        for j in range(length):
+            distance =  round(geodesic( (df.loc[i, "Latitude"], df.loc[i, "Longitude"]), (df.loc[j, "Latitude"], df.loc[j, "Longitude"])).km)
+            matrix[i][j] = distance
+    return matrix
 
 
 def print_matrix(matrix):
-  length = len(matrix)
+    # print a Python 2d array (does not work for Numpy Array)
+    length = len(matrix)
+    for i in range(length):
+        for j in range(length):
+         print(matrix[i][j], "", end="")
+    print("\n")
+
+
+def create_distance_matrix_numpy(df):
+  # Takes a pandas DataFrame that must contain Longitude and Latitude columns
+  # Returns a numpy matrix where the indexes of each row/column correspond with the point in the input DataFrame
+  length = df.shape[0]
+
+  matrix = np.empty((length, length))
   for i in range(length):
     for j in range(length):
-      print(matrix[i][j], "", end="")
-    print("\n")
+      distance = round( geodesic((df.loc[i, "Latitude"], df.loc[i, "Longitude"]), (df.loc[j, "Latitude"], df.loc[j, "Longitude"])).km)
+      matrix[i,j] = distance
+  return matrix
 
 
 
@@ -108,14 +122,11 @@ if __name__ == '__main__':
     gdf['Visited'] = False # append Visited column and initialize to false
     gdf['Distance to Next'] = -1
     gdf['Visitation Index'] = -1 # Keep track of the order in which we visit each place for replay at the end
-    print(gdf.loc[:,['Name','Coordinates']]) # print all rows of Place Name and Coordinate columns only
+    #print(gdf.loc[:,['Name','Coordinates']]) # print all rows of Place Name and Coordinate columns only
 
-    # plot the coordinates over a country-level map
+    # Plot the coordinates over a country-level map
     world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
-
-
     ax = world[world.continent == 'North America'].plot(color='white', edgecolor='black') # restrict to North America
-
     ax.set_title('Shortest Path to US National Parks')
     gdf.plot(ax=ax, color='red')
     plt.xlabel('Longitude')
@@ -125,10 +136,17 @@ if __name__ == '__main__':
                      xy=(row.Longitude, row.Latitude),
                      xytext=(row.Longitude+1, row.Latitude+1),
                      horizontalalignment='center')
-
     #plt.show()
 
-    parks = [] # List of Places
+
+    # Solve Traveling Salesman Problem (TSP) using Nearest Neighbor (NN) approach using a pre-computed distance matrix
+    distanceMatrix = create_distance_matrix_numpy(df)
+    print(distanceMatrix)
+
+
+    # Solve Traveling Salesman Problem (TSP) using Nearest Neighbor (NN) approach and a Linked List datastructure
+    # Initialize data
+    parks = []
     shortestRoute = Route()
     for idx,row in gdf.iterrows():
         currPlace = Place()
@@ -178,10 +196,10 @@ if __name__ == '__main__':
         shortestRoute.tailval.nearestDistance = currDist
         shortestRoute.tailval = nearestPark  # Make the nearest place the last place
 
-    # Print Result
+    # Print the Nearest Neighbor solution to TSP
     #shortestRoute.listprint()
     #shortestRoute.listprint_csv()
-    print(shortestRoute.convert_to_dataframe())
+    #print(shortestRoute.convert_to_dataframe())
 
 
 
