@@ -15,7 +15,8 @@ class Place: # A type of Linked List Node that also has coordinate and distance 
         self.long = long
 
         self.nextPlace = None
-        self.nearestDistance = sys.maxsize
+        self.nearestDistance = -1
+        self.index = -1
 
     def distance_to(self, destination):
         # Find distance between Route Tail and currPark
@@ -32,20 +33,33 @@ class Route: # A Linked List comprised of places
 
     def listprint(self):
         printval = self.headval
+        count = 0
         while printval is not None:
-            print (printval.name, printval.lat, printval.long, printval.nearestDistance)
+            print (count, printval.name, printval.lat, printval.long, printval.nearestDistance)
             printval = printval.nextPlace
+            count = count + 1
 
     def listprint_csv(self):
-        print('Name,', 'Latitude,', 'Longitude,', 'Distance to Next Place (km)')
+        print('Index,', 'Name,', 'Latitude,', 'Longitude,', 'Distance to Next Place (km)')
         printval = self.headval
 
         while printval is not None:
-            print (printval.name.replace(',', ''), ',',
+            print (printval.index, ',',
+                    printval.name.replace(',', ''), ',',
                    printval.lat, ',',
                    printval.long, ',',
                    str(printval.nearestDistance).replace('km',''))
             printval = printval.nextPlace
+
+    def convert_to_dataframe(self):
+        df = pd.DataFrame(columns=['Index','Name','Distance_To_Next_km'])
+        convertval = self.headval
+        for i in range(self.length):
+            df.loc[i]=[convertval.index,
+                      convertval.name,
+                      str(convertval.nearestDistance).replace('km', '')]
+            convertval = convertval.nextPlace
+        return df
 
     def add_place(self, place):
 
@@ -60,7 +74,26 @@ class Route: # A Linked List comprised of places
 
 
 
+def create_distance_matrix(df):
+  # df is a pandas DataFrame that must contain Longitude and Latitude columns
+  length = df.shape[0]
 
+  # intialize square matrix of shape length x length
+  matrix = [[0 for i in range(length)] for j in range(length)]
+  for i in range(length):
+    for j in range(length):
+      distance =  round(geodesic( (df.loc[i, "Latitude"], df.loc[i, "Longitude"]), (df.loc[j, "Latitude"], df.loc[j, "Longitude"])).km)
+      matrix[i][j] = distance
+
+  return matrix
+
+
+def print_matrix(matrix):
+  length = len(matrix)
+  for i in range(length):
+    for j in range(length):
+      print(matrix[i][j], "", end="")
+    print("\n")
 
 
 
@@ -79,8 +112,7 @@ if __name__ == '__main__':
 
     # plot the coordinates over a country-level map
     world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
-    print(world.columns)
-    print(world.iloc[:, 0:3])
+
 
     ax = world[world.continent == 'North America'].plot(color='white', edgecolor='black') # restrict to North America
 
@@ -94,35 +126,17 @@ if __name__ == '__main__':
                      xytext=(row.Longitude+1, row.Latitude+1),
                      horizontalalignment='center')
 
-    plt.show()
-
-
-    currentLocation = 0 # Index of the starting location
-    gdf.loc[currentLocation, 'Visited'] = True
-    gdf.loc[currentLocation, 'Visitation Index'] = 0
-    #print(pp)
-    for row in df.itertuples(index=True, name='Pandas'): # row is a tuple
-        if getattr(row, 'Visited') is False:
-            # find distance between currentLocation and row
-            # keep track of NearestNeighbor index
-
-            print(row[0])
-
-
+    #plt.show()
 
     parks = [] # List of Places
-
     shortestRoute = Route()
-    # Load CSV of National Park Coordinates
-    with open('NationalParkGPSCoords.csv', encoding="utf8") as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        next(readCSV) # skip CSV header: Place Name, Latitude, Longitude
-        for row in readCSV:
-            currPlace = Place()
-            currPlace.name = row[0]
-            currPlace.lat = row[1]
-            currPlace.long = row[2]
-            parks.append(currPlace)
+    for idx,row in gdf.iterrows():
+        currPlace = Place()
+        currPlace.name = row.Name
+        currPlace.lat = row.Latitude
+        currPlace.long = row.Longitude
+        currPlace.index = idx
+        parks.append(currPlace)
 
     # TODO: Add user input to select starting point
     # Add the first place as the head of the Linked List
@@ -131,10 +145,10 @@ if __name__ == '__main__':
     shortestRoute.add_place(startingPlace)
 
     # Compute until we have processed all of the parks.
-    while shortestRoute.length <= parks.__len__():
+    while parks.__len__() is not 0:
         # Initialize loop
         nearestPark = None
-        nearestParkDistance = sys.maxsize
+        nearestParkDistance = -1
 
         # Iterate through all parks and find the nearest park to the current tail of the Route
         for currPark in parks:
@@ -153,10 +167,11 @@ if __name__ == '__main__':
                 nearestParkDistance = currDist
                 next
 
-            if currDist < nearestParkDistance:  # We found a nearer park than previously discovered
+            if nearestParkDistance is not -1 and currDist < nearestParkDistance:  # We found a nearer park than previously discovered
                 nearestPark = currPark
                 nearestParkDistance = currDist
 
+# TODO: Use Route.add_place() below so that length of route is updated. Then we can iterate over the route to convert to dataframe
         # Update ShortestRoute with the nearest Park
         parks.remove(nearestPark)  # Remove the nearest park from the possible parks
         shortestRoute.tailval.nextPlace = nearestPark  # Point last place to the nearest place
@@ -166,7 +181,7 @@ if __name__ == '__main__':
     # Print Result
     #shortestRoute.listprint()
     #shortestRoute.listprint_csv()
+    print(shortestRoute.convert_to_dataframe())
 
 
-## TODO: Plot points on map
 
