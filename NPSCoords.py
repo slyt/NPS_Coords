@@ -60,7 +60,6 @@ def find_nearest(location, list_of_neighbors):
 
 
     for i in range(1,len(list_of_neighbors)): # start at index 1 because we already tested the 0 index neighbor
-        print(i)
         currNeighbor = list_of_neighbors[i]
         currDistance = distance_between(location, currNeighbor)
         if currDistance < minDistance:
@@ -102,19 +101,15 @@ if __name__ == '__main__':
     unvisited = []
 
     # Initialize unvisited List
-    count = 0
     for row in df.itertuples():
-        place = {'Name':row.Park,
+        place = {'Name':row.Name,
                  'Latitude':row.Latitude,
                  'Longitude':row.Longitude}
         unvisited.append(place)
-        count = count + 1
-    print(count)
 
     # Choose start location and prepare to solve
-    currLocation = unvisited.pop(0)
+    currLocation = unvisited.pop(18)
 
-    print('unvisited length:', len(unvisited))
     for i in range(len(unvisited)): # Use index loop because unvisited[] will be modified upon each iteration
         nearest = find_nearest(location=currLocation, list_of_neighbors=unvisited)
         currLocation.update( {'Distance': nearest['Distance']} ) # Add Distance to dictionary
@@ -125,6 +120,14 @@ if __name__ == '__main__':
     # Append final location with distance of 0
     currLocation.update( {'Distance': 0} ) # Add Distance to dictionary
     route.append(currLocation)
+
+
+    # Merge results in original DataFrame
+    dfRoute = pd.DataFrame(route)
+    dfRoute['Visit_Order'] = dfRoute.index
+    df = df.merge(dfRoute.set_index('Name'))
+    df = df.sort_values('Visit_Order')
+    print(df.loc[:,['Name','Visit_Order']])
 
 
     # Plot result on a geographical map
@@ -138,12 +141,15 @@ if __name__ == '__main__':
     gdf.plot(ax=ax, color='red')
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
+
+    # Annotate the plot (looks terrible)
     # for idx,row in gdf.iterrows():
-    #     plt.annotate(s=row.Name,
+    #     plt.annotate(s=row.Park,
     #                  xy=(row.Longitude, row.Latitude),
     #                  xytext=(row.Longitude+1, row.Latitude+1),
     #                  horizontalalignment='center')
-    #plt.show()
+
+    plt.show()
 
 
     # TODO: Solve Traveling Salesman Problem (TSP) using Nearest Neighbor (NN) approach using a pre-computed distance matrix
@@ -153,11 +159,3 @@ if __name__ == '__main__':
 
     #TODO: Animate routing solutions on geographical map
 
-    # Verify results of Nearest Neighbor Solution
-    count = 0
-    for place in route:
-        print(count,
-            place['Name'],
-              place['Distance'])
-        count = count + 1
-    print(count)
