@@ -58,7 +58,9 @@ def find_nearest(location, list_of_neighbors):
     minDistance = distance_between(location, currNeighbor)
     minIndex = 0
 
-    for i in range(1,len(list_of_neighbors)-1): # start at index 1 because we already tested the 0 index neighbor
+
+    for i in range(1,len(list_of_neighbors)): # start at index 1 because we already tested the 0 index neighbor
+        print(i)
         currNeighbor = list_of_neighbors[i]
         currDistance = distance_between(location, currNeighbor)
         if currDistance < minDistance:
@@ -67,22 +69,24 @@ def find_nearest(location, list_of_neighbors):
 
     return {'Index':minIndex, 'Neighbor': list_of_neighbors[minIndex], 'Distance':minDistance} # initialize dict with default values
 
+
 if __name__ == '__main__':
 
     # df = dataframe
     df = pd.read_csv('NationalParkGPSCoords.csv')# pandas dataframe of national parks and their coordinates
 
     # TODO: Break Park column into seperate columns: Name, City, State, Country
-    nameDf = df['Park'].str.split(',', expand = True)
+    # nameDf = df['Park'].str.split(',', expand = True)
     # print(nameDf.iloc[:,1:4])
     # Could shift rows over that have None instead of USA
 
     df['Coordinates'] = list(zip(df.Longitude, df.Latitude)) # GeoDataFrame needs shapely object, so create Coord tuple column
     df['Coordinates'] = df['Coordinates'].apply(Point) # Convert tuple to Point
 
+
     # TODO: re-implement Nearest Neighbor using List of Tuples as underlying datastructure
     # Place:
-    # A List will represent a Place and contain [Name, Longitude, Latitude, Distance To Next Place in km (-1 if not defined)]
+    # A Dictionary will represent a Place and contain {Name, Longitude, Latitude, Distance To Next Place in km}
     #
     # Route:
     # A List of Places is used to represent the Nearest Neighbor Route.
@@ -98,30 +102,29 @@ if __name__ == '__main__':
     unvisited = []
 
     # Initialize unvisited List
+    count = 0
     for row in df.itertuples():
         place = {'Name':row.Park,
                  'Latitude':row.Latitude,
                  'Longitude':row.Longitude}
         unvisited.append(place)
+        count = count + 1
+    print(count)
 
     # Choose start location and prepare to solve
-    currLocation = unvisited.pop()
+    currLocation = unvisited.pop(0)
+
+    print('unvisited length:', len(unvisited))
     for i in range(len(unvisited)): # Use index loop because unvisited[] will be modified upon each iteration
         nearest = find_nearest(location=currLocation, list_of_neighbors=unvisited)
         currLocation.update( {'Distance': nearest['Distance']} ) # Add Distance to dictionary
         route.append(currLocation)
-
         del unvisited[nearest['Index']]
         currLocation = nearest['Neighbor']
 
-
-    # Verify results of Nearest Neighbor Solution
-    count = 0
-    for place in route:
-        print(count,
-            place['Name'],
-              place['Distance'])
-        count = count + 1
+    # Append final location with distance of 0
+    currLocation.update( {'Distance': 0} ) # Add Distance to dictionary
+    route.append(currLocation)
 
 
     # Plot result on a geographical map
@@ -144,11 +147,17 @@ if __name__ == '__main__':
 
 
     # TODO: Solve Traveling Salesman Problem (TSP) using Nearest Neighbor (NN) approach using a pre-computed distance matrix
-    distanceMatrix = create_distance_matrix_numpy(df)
+    #distanceMatrix = create_distance_matrix_numpy(df)
     #print(distanceMatrix)
 
 
-    #TODO: Plot routing solutions on geographical map
+    #TODO: Animate routing solutions on geographical map
 
-
-
+    # Verify results of Nearest Neighbor Solution
+    count = 0
+    for place in route:
+        print(count,
+            place['Name'],
+              place['Distance'])
+        count = count + 1
+    print(count)
