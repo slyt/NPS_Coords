@@ -1,4 +1,4 @@
-Name,Latitude,Longitude
+Park,Latitude,Longitude
 "Jackson Hole, WY, USA",43.582767,-110.821999
 "Mojave National Preserve, Kelso, CA, USA",35.141689,-115.510399
 "Joshua Tree National Park, California, USA",33.881866,-115.90065
@@ -14,7 +14,6 @@ Name,Latitude,Longitude
 "Turtle Mountain, ND, USA",48.852882,-99.803535
 "Odiorne Point State Park, Rye, NH, USA",43.049023,-70.720192
 "Channel Islands National Park, Ventura, CA, USA",33.998028,-119.772949
-"Snowdonia National Park, Gwynedd, UK",52.918011,-3.89122
 "Maplewood State Park, Pelican Rapids, MN, USA",46.520966,-95.951576
 "Bear Butte State Park, Sturgis, SD, USA",44.475296,-103.424309
 "Okefenokee National Wildlife Refuge, Folkston, GA, USA",30.77323,-82.292732
@@ -32,7 +31,6 @@ Name,Latitude,Longitude
 "Anahuac National Wildlife Refuge, Anahuac, TX, USA",29.6103,-94.449081
 "Bandelier National Monument, Los Alamos, NM, USA",35.767288,-106.311607
 "Summit Bechtel Reserve, Glen Jean, WV, USA",37.916035,-81.123047
-"Yellowstone National Park, WY, USA",44.427895,-110.588379
 "Rothrock State Forest, State College, PA, USA",40.720585,-77.826965
 "Great Smoky Mountains National Park, Tennessee, USA",35.611763,-83.489548
 "Zion National Park, Utah, USA",37.317207,-113.022537
